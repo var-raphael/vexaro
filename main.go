@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/var-raphael/vexaro-engine/ai"
 	"github.com/var-raphael/vexaro-engine/clean"
+	"github.com/var-raphael/vexaro-engine/combine"
 	"github.com/var-raphael/vexaro-engine/crawl"
+	"github.com/var-raphael/vexaro-engine/format"
 	"github.com/var-raphael/vexaro-engine/ping"
 	"github.com/var-raphael/vexaro-engine/serp"
 )
@@ -22,6 +26,9 @@ func main() {
 	http.HandleFunc("/test-serp", testSerpHandler)
 	http.HandleFunc("/test-crawl", testCrawlHandler)
 	http.HandleFunc("/test-clean", testCleanHandler)
+	http.HandleFunc("/test-format", testFormatHandler)
+	http.HandleFunc("/test-extract", testExtractHandler)
+	http.HandleFunc("/test-combine", testCombineHandler)
 
 	port := ":8080"
 	log.Println("server running on", port)
@@ -79,4 +86,79 @@ func testCleanHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("clean complete")
 	w.Write([]byte("done — cleaned.json written alongside each raw.json\n"))
+}
+
+func testFormatHandler(w http.ResponseWriter, r *http.Request) {
+	schema, err := format.ParseSchema(map[string]json.RawMessage{
+		"name":          json.RawMessage(`"text"`),
+		"description":   json.RawMessage(`"text"`),
+		"origin":        json.RawMessage(`"text"`),
+		"cat_img":       json.RawMessage(`"image"`),
+		"cat_links":     json.RawMessage(`"link"`),
+		"download_file": json.RawMessage(`"file"`),
+	})
+	if err != nil {
+		log.Println("format schema error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := format.FormatFromPaths("clean.txt", schema); err != nil {
+		log.Println("format error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("format complete")
+	w.Write([]byte("done — format.json written alongside each cleaned.json\n"))
+}
+
+
+func testExtractHandler(w http.ResponseWriter, r *http.Request) {
+	schema := map[string]*ai.SchemaField{
+		"name": {
+			Type:        "text",
+			Description: "the name of the cat breed",
+		},
+		"description": {
+			Type:        "text",
+			Description: "a brief description of the cat breed's personality and appearance",
+		},
+		"origin": {
+			Type:        "text",
+			Description: "the country or region where the cat breed originated",
+		},
+		"cat_img": {
+			Type:        "image",
+			Description: "an image URL of the cat breed",
+		},
+		"cat_links": {
+			Type:        "link",
+			Description: "relevant links related to the cat breed",
+		},
+		"download_file": {
+			Type:        "file",
+			Description: "downloadable files related to the cat breed",
+		},
+	}
+
+	if err := ai.ExtractFromPaths("format.txt", schema); err != nil {
+		log.Println("extract error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("extract complete")
+	w.Write([]byte("done — check extract.json\n"))
+}
+
+func testCombineHandler(w http.ResponseWriter, r *http.Request) {
+	if err := combine.CombineFromPaths("extract.txt", "test-api"); err != nil {
+		log.Println("combine error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println("combine complete")
+	w.Write([]byte("done — check data/test-api/result.json\n"))
 }

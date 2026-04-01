@@ -1,0 +1,84 @@
+{
+  "entities": [
+    {
+      "description": null,
+      "name": "Russian Blue",
+      "origin": "Russia"
+    },
+    {
+      "description": null,
+      "name": "American Shorthair",
+      "origin": "United States"
+    },
+    {
+      "description": null,
+      "name": "British Shorthair",
+      "origin": "United Kingdom"
+    },
+    {
+      "description": null,
+      "name": "Maine Coon Cat",
+      "origin": "United States"
+    },
+    {
+      "description": "known for their intelligence and vocal skills, with distinct markings called 'points,' which are the areas of coloration on their face, ears, feet, and tail",
+      "name": "Siamese",
+      "origin": "Thailand"
+    },
+    {
+      "description": "beautiful, long fur coats, can come in almost any color, have a flat face, and are prone to a variety of diseases, including renal and cardiac problems",
+      "name": "Persian",
+      "origin": "Iran"
+    },
+    {
+      "description": "large stature, thick fur coat, gentle giant, great hunters, and have polydactylism, or extra toes",
+      "name": "Maine Coon",
+      "origin": "Maine"
+    },
+    {
+      "description": "docile temperament, tend to go limp when picked up, have distinctive blue eyes, and dog-like personalities",
+      "name": "Ragdoll",
+      "origin": null
+    },
+    {
+      "description": "wild-looking cats, domesticated, talkative, require a lot of exercise, and have beautiful patterns from the Asian leopard cat",
+      "name": "Bengal",
+      "origin": "Bengal"
+    },
+    {
+      "description": "distinctive ruddy agouti coat, tall, pointy ears, wedge-shaped head, slender and muscular body, active, curious, and playful",
+      "name": "Abyssinian",
+      "origin": "Ethiopia"
+    },
+    {
+      "description": "color-pointed cat, blue eyes, medium-long coat, no undercoat, fun, social, and love attention from their chosen person",
+      "name": "Birman",
+      "origin": null
+    },
+    {
+      "description": "slender cat, green eyes, many color patterns and colors, prone to skin cancer and getting cold due to lack of fur",
+      "name": "Oriental Shorthair",
+      "origin": null
+    },
+    {
+      "description": "unique, lack of fur, social, active, dog-like felines, playful, and goofy",
+      "name": "Sphynx",
+      "origin": null
+    },
+    {
+      "description": "unique, wavy hair, soft short hair, slender bodies, enormous ears, playful, active, and trainable",
+      "name": "Devon Rex",
+      "origin": null
+    },
+    {
+      "description": "color pointed, bred from crossing Persians and Siamese, love attention and affection, sweet personalities, and playful",
+      "name": "Himalayan",
+      "origin": null
+    },
+    {
+      "description": "intelligent, shorthaired feline, round face, short ears, gentle nature, great companion for families with children or other pets",
+      "name": "American Shorthair",
+      "origin": "North America"
+    }
+  ]
+}

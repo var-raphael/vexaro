@@ -1,0 +1,234 @@
+{
+  "entities": [
+    {
+      "description": null,
+      "name": "Russian Blue",
+      "origin": null
+    },
+    {
+      "description": null,
+      "name": "American Shorthair",
+      "origin": null
+    },
+    {
+      "description": null,
+      "name": "British Shorthair",
+      "origin": null
+    },
+    {
+      "description": null,
+      "name": "Maine Coon Cat",
+      "origin": null
+    },
+    {
+      "description": "known for their intelligence and vocal skills, with distinct markings called 'points,' which are the areas of coloration on their face, ears, feet, and tail",
+      "name": "Siamese",
+      "origin": "Thailand"
+    },
+    {
+      "description": "beautiful, long fur coats, flat face, and a variety of colors, but prone to diseases such as renal and cardiac problems",
+      "name": "Persian",
+      "origin": "Iran"
+    },
+    {
+      "description": "large stature, thick fur coat, gentle giant, great hunters, and often have polydactylism, or extra toes",
+      "name": "Maine Coon",
+      "origin": "Maine"
+    },
+    {
+      "description": "docile temperament, tend to go limp when picked up, with pointed color patterns, blue eyes, and dog-like personalities",
+      "name": "Ragdoll",
+      "origin": null
+    },
+    {
+      "description": "wild-looking cats, domesticated, talkative, and require a lot of exercise, with many colors and patterns like spots and rosettes",
+      "name": "Bengal",
+      "origin": null
+    },
+    {
+      "description": "distinctive ruddy agouti coat, tall, pointy ears, wedge-shaped head, and a slender and muscular body, active, curious cats",
+      "name": "Abyssinian",
+      "origin": "Ethiopia"
+    },
+    {
+      "description": "color-pointed cat, blue eyes, medium-long coat, fun, social cats that love attention, and more of a one-person cat",
+      "name": "Birman",
+      "origin": null
+    },
+    {
+      "description": "slender cat, green eyes, many color patterns and colors, prone to skin cancer and getting cold due to lack of fur",
+      "name": "Oriental Shorthair",
+      "origin": null
+    },
+    {
+      "description": "unique, lack of fur, very social, active, dog-like felines, playful, and goofy, despite their regal appearance",
+      "name": "Sphynx",
+      "origin": null
+    },
+    {
+      "description": "unique, wavy hair, soft short hair, slender bodies, enormous ears, playful, active cat, described as 'a monkey in a catsuit'",
+      "name": "Devon Rex",
+      "origin": null
+    },
+    {
+      "description": "color pointed, bred from crossing Persians and Siamese, love attention and affection, sweet personalities, and playful",
+      "name": "Himalayan",
+      "origin": null
+    },
+    {
+      "description": "intelligent, shorthaired feline, round face, short ears, gentle nature, great companion for families with children or other pets",
+      "name": "American Shorthair",
+      "origin": "North America"
+    }
+  ],
+  "sources": [
+    {
+      "files": [],
+      "images": [
+        "https://paradepets.com/.image/NTowMDAwMDAwMDAwMjg3Mzg4/maine-coon-cat.jpg?io=1\u0026profile=share1-1",
+        "https://paradepets.com/.image/NTowMDAwMDAwMDAwMjg3Mzg4/maine-coon-cat.jpg?io=1\u0026profile=share16-9",
+        "https://paradepets.com/.image/NTowMDAwMDAwMDAwMjg3Mzg4/maine-coon-cat.jpg?io=1\u0026profile=share4-3",
+        "https://paradepets.com/.image/NTowMDAwMDAwMDAwMjM4NTU5/paradepets-logo.jpg?io=1\u0026profile=default"
+      ],
+      "links": [
+        "https://paradepets.com/author/nathan-hutsenpiller#author",
+        "https://paradepets.com/pet-news/top-10-cat-breeds-in-the-united-states#article",
+        "https://paradepets.com/pet-news/top-10-cat-breeds-in-the-united-states",
+        "https://paradepets.com/",
+        "https://www.facebook.com/ParadePetsNews/",
+        "https://x.com/ParadePets",
+        "https://www.instagram.com/Parade.Pets/",
+        "https://paradepets.com/author/nathan-hutsenpiller",
+        "https://paradepets.com/pet-news/akita-shows-off-hilarious-running-form",
+        "https://paradepets.com/pet-news/cat-has-staring-contest-with-neighbor"
+      ],
+      "url": "https://paradepets.com/pet-news/top-10-cat-breeds-in-the-united-states"
+    },
+    {
+      "files": [],
+      "images": [
+        "https://www.thesprucepets.com/thmb/ffUDF7Zz72gC5HNQB1t-1efzazo=/1500x0/filters:no_upscale():strip_icc():format(webp)/personalities-of-popular-cat-breeds-554219-hero-d47de86e0d374f80afa374f8b7309847.jpg",
+        "https://www.thesprucepets.com/thmb/vxfoYJZZ53MM9Z9GnP_CF-7diWY=/1733x0/filters:no_upscale():strip_icc():format(webp)/Stocksy_txpe3e966aau8r100_Medium_1128816-5a9426131d64040037fe58bc.jpg"
+      ],
+      "links": [
+        "https://www.thesprucepets.com/personalities-of-popular-cat-breeds-554219#skip-to-content",
+        "https://www.thesprucepets.com/",
+        "https://www.thesprucepets.com/dogs-4162034",
+        "https://www.thesprucepets.com/dog-basics-4162146",
+        "https://www.thesprucepets.com/dog-breeds-4162141",
+        "https://www.thesprucepets.com/dogs-health-4162140",
+        "https://www.thesprucepets.com/dog-nutrition-and-food-4162139",
+        "https://www.thesprucepets.com/dog-behavior-and-training-4162131",
+        "https://www.thesprucepets.com/cats-4162124",
+        "https://www.thesprucepets.com/cat-basics-4162104",
+        "https://www.thesprucepets.com/cat-breeds-4162123",
+        "https://www.thesprucepets.com/cat-health-4162122",
+        "https://www.thesprucepets.com/cat-nutrition-and-food-4162121",
+        "https://www.thesprucepets.com/cat-behavior-and-training-4162113",
+        "https://www.thesprucepets.com/birds-4162101",
+        "https://www.thesprucepets.com/bird-basics-4162100",
+        "https://www.thesprucepets.com/bird-breeds-4162096",
+        "https://www.thesprucepets.com/bird-health-4162091",
+        "https://www.thesprucepets.com/bird-nutrition-and-food-4162090",
+        "https://www.thesprucepets.com/bird-behavior-and-training-4162089",
+        "https://www.thesprucepets.com/bird-supplies-and-toys-4162088",
+        "https://www.thesprucepets.com/small-pets-4162085",
+        "https://www.thesprucepets.com/exotic-pets-4162074",
+        "https://www.thesprucepets.com/rabbits-4162081",
+        "https://www.thesprucepets.com/hamsters-4162083",
+        "https://www.thesprucepets.com/guinea-pigs-4162082",
+        "https://www.thesprucepets.com/hedgehogs-4162080",
+        "https://www.thesprucepets.com/rats-4162078",
+        "https://www.thesprucepets.com/fish-and-aquariums-4162060",
+        "https://www.thesprucepets.com/aquarium-care-maintenance-5268228",
+        "https://www.thesprucepets.com/freshwater-fish-and-aquariums-4162059",
+        "https://www.thesprucepets.com/saltwater-fish-and-aquariums-4162052",
+        "https://www.thesprucepets.com/reptiles-and-amphibians-4162044",
+        "https://www.thesprucepets.com/snakes-4162043",
+        "https://www.thesprucepets.com/geckos-4162039",
+        "https://www.thesprucepets.com/aquatic-turtles-4162042",
+        "https://www.thesprucepets.com/frogs-and-toads-4162035",
+        "https://www.thesprucepets.com/tortoises-4162040",
+        "https://www.thesprucepets.com/bearded-dragons-4162036",
+        "https://www.thesprucepets.com/horses-4162073",
+        "https://www.thesprucepets.com/horse-basics-4162072",
+        "https://www.thesprucepets.com/horse-breeds-4162070",
+        "https://www.thesprucepets.com/horse-health-4162065",
+        "https://www.thesprucepets.com/horse-nutrition-and-food-4162064",
+        "https://www.thesprucepets.com/horse-behavior-and-training-4162066",
+        "https://www.thesprucepets.com/horse-stables-and-equipment-4162067",
+        "https://www.thesprucepets.com/best-pet-products-4690375",
+        "https://www.thesprucepets.com/cat-product-reviews-4162109",
+        "https://www.thesprucepets.com/dog-product-reviews-4162128",
+        "https://www.thesprucepets.com/pet-cleaning-reviews-4690386",
+        "https://www.thesprucepets.com/book-and-gift-reviews-4690389",
+        "https://www.thesprucepets.com/fish-and-aquarium-reviews-4690385",
+        "https://www.thesprucepets.com/small-pet-and-reptile-reviews-4690388",
+        "https://www.thesprucepets.com/about-us-4776796",
+        "https://www.thesprucepets.com/the-spruce-pets-editorial-policy-5196801",
+        "https://www.thesprucepets.com/commerce-guidelines-and-mission-4163661",
+        "https://www.thesprucepets.com/sweepstakes",
+        "https://www.thesprucepets.com/the-spruce-pets-veterinary-review-board-4775366",
+        "https://www.thesprucepets.com/about-us-4776796#toc-contact-us",
+        "https://www.thesprucepets.com/about-us-4776796#toc-editorial-guidelines",
+        "https://www.thesprucepets.com/adrienne-kruzer-rvt-1236690",
+        "https://www.facebook.com/pages/Exotic-Pets/381888854202",
+        "https://twitter.com/exoticpetexpert",
+        "https://www.thesprucepets.com/bartley-harrison-5201218",
+        "https://www.terrapinmc.com",
+        "https://www.thesprucepets.com/what-is-a-domestic-cat-554691",
+        "https://www.thesprucepets.com/what-breed-is-my-cat-554697",
+        "https://www.thesprucepets.com/hybrid-cat-breeds-4176576",
+        "https://www.thesprucepets.com/siamese-cat-breed-profile-551912",
+        "https://www.thesprucepets.com/persian-cat-breed-5220970",
+        "https://www.thesprucepets.com/persian-cats-gallery-4121944",
+        "https://www.thesprucepets.com/best-cat-brushes-4590060",
+        "https://www.thesprucepets.com/heart-disease-in-cats-3384855",
+        "https://www.thesprucepets.com/maine-coon-cat-breed-profile-characteristics-and-care-5221962",
+        "https://www.thesprucepets.com/maine-coon-cat-picture-gallery-4031806",
+        "https://www.thesprucepets.com/ragdoll-cat-breed-profile-4583144",
+        "https://www.thesprucepets.com/ragdoll-cats-gallery-4122006",
+        "https://www.thesprucepets.com/bengal-cats-1238154",
+        "https://www.thesprucepets.com/abyssinian-cat-breed-profile-4797632",
+        "https://www.thesprucepets.com/birman-cat-breed-profile-characteristics-and-care-5220182",
+        "https://www.thesprucepets.com/oriental-shorthair-cat-breed-profile-4774945",
+        "https://www.thesprucepets.com/sphynx-cat-4176530",
+        "https://www.thesprucepets.com/cute-sphynx-cat-photos-4173584",
+        "https://www.thesprucepets.com/devon-rex-cat-breed-profile-11719929",
+        "https://www.thesprucepets.com/himalayan-cat-breed-profile-4691062",
+        "https://www.thesprucepets.com/american-shorthair-cat-breed-profile-4774399",
+        "https://www.thesprucepets.com/rarest-cat-breeds-4797965",
+        "https://www.thesprucepets.com/scottish-fold-profile-551898",
+        "https://www.thesprucepets.com/egyptian-mau-cat-breed-profile-5323874",
+        "https://www.thesprucepets.com/chausie-cat-breed-profile-5188031",
+        "https://www.thesprucepets.com/toyger-cat-profile-554213",
+        "https://www.thesprucepets.com/savannah-breed-profile-554212",
+        "https://www.thesprucepets.com/american-cat-breeds-4845523",
+        "https://searchworks-lb.stanford.edu/articles/edo__147196023",
+        "https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center/health-information/feline-health-topics/squamous-cell-cancer-dangerous",
+        "https://vcahospitals.com/know-your-pet/cat-breeds/american-shorthair",
+        "https://www.thesprucepets.com/these-cats-live-the-longest-4693535",
+        "https://www.thesprucepets.com/cute-cat-breeds-5176271",
+        "https://www.thesprucepets.com/breeds-domestics-and-color-patterns-554862",
+        "https://www.thesprucepets.com/learn-all-about-the-cornish-rex-cat-4694497",
+        "https://www.thesprucepets.com/pictures-of-norwegian-forest-cats-4172243",
+        "https://www.thesprucepets.com/american-bobtail-full-profile-history-and-care-4705973",
+        "https://www.thesprucepets.com/donskoy-cat-breed-profile-4777828",
+        "https://www.thesprucepets.com/korat-cat-breed-profile-5113718",
+        "https://www.thesprucepets.com/calico-cats-photo-gallery-4031810",
+        "https://www.thesprucepets.com/siamese-cat-picture-gallery-4122021",
+        "https://www.thesprucepets.com/peterbald-cat-breed-profile-4778267",
+        "https://www.thesprucepets.com/moggie-breed-profile-554285",
+        "https://www.instagram.com/thesprucepets/",
+        "https://www.pinterest.com/thespruceofficial/",
+        "https://www.facebook.com/thesprucepets",
+        "https://www.people.inc/brands-termsofservice",
+        "https://www.people.inc/advertising",
+        "https://www.people.inc/careers",
+        "https://www.people.inc/brands-privacy",
+        "https://www.people.inc"
+      ],
+      "url": "https://www.thesprucepets.com/personalities-of-popular-cat-breeds-554219"
+    }
+  ]
+}

@@ -24,7 +24,7 @@ type RawData struct {
 
 // CleanedData is what gets written to cleaned.json
 type CleanedData struct {
-	URL         string            `json:"url"`
+	URL         string            `json:"source_url"`
 	Title       string            `json:"title"`
 	Content     string            `json:"content"`
 	WordCount   int               `json:"word_count"`
