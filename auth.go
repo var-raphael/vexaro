@@ -38,11 +38,7 @@ func getAuthenticatedUserID(r *http.Request) (string, error) {
 	}
 
 	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(tokenStr, claims, jwks.Keyfunc,
-		jwt.WithValidMethods([]string{"RS256"}),
-		jwt.WithIssuer("https://jctoirrmiyjqznrtjqww.supabase.co/auth/v1"),
-		jwt.WithExpirationRequired(),
-	)
+	_, err := jwt.ParseWithClaims(tokenStr, claims, jwks.Keyfunc)
 	if err != nil {
 		return "", fmt.Errorf("invalid token: %w", err)
 	}
