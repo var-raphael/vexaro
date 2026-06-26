@@ -1,0 +1,9 @@
+.env
+.envvvv
+serp_results.txt
+paths.txt
+clean.txt
+format.txt
+extract.txt
+data/
+proxies.txt
