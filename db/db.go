@@ -48,6 +48,7 @@ func buildDSN() string {
 	port := os.Getenv("DB_PORT")
 	name := os.Getenv("DB_NAME")
 	env  := os.Getenv("ENV")
+	
 
 	if env == "production" {
 		certPool := x509.NewCertPool()
