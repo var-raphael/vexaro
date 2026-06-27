@@ -727,338 +727,360 @@ func setupMCPServer() *server.MCPServer {
 	)
 
 	// ── Tool: get_dataset_schema ──────────────────────────────────────────────
-	s.AddTool(
-		mcp.NewTool("get_dataset_schema",
-			mcp.WithDescription("Get the field schema of a dataset. Call this before query_dataset to understand what fields are available for filtering and sorting."),
-			mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to inspect")),
-		),
-		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			userID, ok := ctx.Value(mcpUserIDKey).(string)
-			if !ok || userID == "" {
-				return mcp.NewToolResultError("unauthorized"), nil
-			}
 
-			args, ok := req.Params.Arguments.(map[string]interface{})
-			if !ok {
-				return mcp.NewToolResultError("invalid arguments"), nil
-			}
+  s.AddTool(
+    mcp.NewTool("get_dataset_schema",
+        mcp.WithDescription("Get the field schema of a dataset. Call this before query_dataset to understand what fields are available for filtering and sorting."),
+        mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to inspect")),
+    ),
+    func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+        userID, ok := ctx.Value(mcpUserIDKey).(string)
+        if !ok || userID == "" {
+            return mcp.NewToolResultError("unauthorized"), nil
+        }
 
-			datasetID := int64(args["dataset_id"].(float64))
+        args, ok := req.Params.Arguments.(map[string]interface{})
+        if !ok {
+            return mcp.NewToolResultError("invalid arguments"), nil
+        }
 
-			var ownerID, dataName, datasetType string
-			var activeVersion sql.NullInt64
-			err := db.Get().QueryRow(`
-				SELECT user_id, COALESCE(alias, data_name), dataset_type, active_version
-				FROM datasets WHERE dataset_id = ?
-			`, datasetID).Scan(&ownerID, &dataName, &datasetType, &activeVersion)
-			if err == sql.ErrNoRows {
-				return mcp.NewToolResultError("dataset not found"), nil
-			}
-			if err != nil {
-				return mcp.NewToolResultError("query failed: " + err.Error()), nil
-			}
-			if ownerID != userID {
-				return mcp.NewToolResultError("access denied"), nil
-			}
+        datasetIDFloat, ok := args["dataset_id"].(float64)
+        if !ok {
+            return mcp.NewToolResultError("dataset_id is required and must be a number"), nil
+        }
+        datasetID := int64(datasetIDFloat)
 
-			var fieldsJSON string
-			var includeLinks, includeFiles, includeImages int
-			err = db.Get().QueryRow(`
-				SELECT fields, include_links, include_files, include_images
-				FROM dataset_schema WHERE dataset_id = ?
-			`, datasetID).Scan(&fieldsJSON, &includeLinks, &includeFiles, &includeImages)
-			if err != nil {
-				return mcp.NewToolResultError("schema not found"), nil
-			}
+        var ownerID, dataName, datasetType string
+        var activeVersion sql.NullInt64
+        err := db.Get().QueryRow(`
+            SELECT user_id, COALESCE(alias, data_name), dataset_type, active_version
+            FROM datasets WHERE dataset_id = ?
+        `, datasetID).Scan(&ownerID, &dataName, &datasetType, &activeVersion)
+        if err == sql.ErrNoRows {
+            return mcp.NewToolResultError("dataset not found"), nil
+        }
+        if err != nil {
+            return mcp.NewToolResultError("query failed: " + err.Error()), nil
+        }
+        if ownerID != userID {
+            return mcp.NewToolResultError("access denied"), nil
+        }
 
-			var rawFields map[string]map[string]string
-			if err := json.Unmarshal([]byte(fieldsJSON), &rawFields); err != nil {
-				return mcp.NewToolResultError("parse schema failed"), nil
-			}
+        var fieldsJSON string
+        var includeFiles, includeImages int
+        err = db.Get().QueryRow(`
+            SELECT fields, include_files, include_images
+            FROM dataset_schema WHERE dataset_id = ?
+        `, datasetID).Scan(&fieldsJSON, &includeFiles, &includeImages)
+        if err != nil {
+            return mcp.NewToolResultError("schema not found: " + err.Error()), nil
+        }
 
-			var fields []string
-			for k := range rawFields {
-				fields = append(fields, k)
-			}
-			sort.Strings(fields)
+        var includeLinks int
+        err = db.Get().QueryRow(`
+            SELECT include_links FROM datasets WHERE dataset_id = ?
+        `, datasetID).Scan(&includeLinks)
+        if err != nil {
+            return mcp.NewToolResultError("dataset lookup failed: " + err.Error()), nil
+        }
 
-			entityCount := 0
-			if activeVersion.Valid {
-				db.Get().QueryRow(`
-					SELECT COALESCE(entity_count, 0) FROM dataset_versions
-					WHERE dataset_id = ? AND version_number = ?
-				`, datasetID, activeVersion.Int64).Scan(&entityCount)
-			}
+        var rawFields map[string]map[string]string
+        if err := json.Unmarshal([]byte(fieldsJSON), &rawFields); err != nil {
+            return mcp.NewToolResultError("parse schema failed: " + err.Error()), nil
+        }
 
-			result := map[string]interface{}{
-				"dataset_id":     datasetID,
-				"name":           dataName,
-				"dataset_type":   datasetType,
-				"fields":         fields,
-				"field_details":  rawFields,
-				"entity_count":   entityCount,
-				"include_links":  includeLinks == 1,
-				"include_images": includeImages == 1,
-				"include_files":  includeFiles == 1,
-			}
-			b, _ := json.MarshalIndent(result, "", "  ")
-			return mcp.NewToolResultText(string(b)), nil
-		},
-	)
+        var fields []string
+        for k := range rawFields {
+            fields = append(fields, k)
+        }
+        sort.Strings(fields)
+
+        entityCount := 0
+        if activeVersion.Valid {
+            db.Get().QueryRow(`
+                SELECT COALESCE(entity_count, 0) FROM dataset_versions
+                WHERE dataset_id = ? AND version_number = ?
+            `, datasetID, activeVersion.Int64).Scan(&entityCount)
+        }
+
+        result := map[string]interface{}{
+            "dataset_id":     datasetID,
+            "name":           dataName,
+            "dataset_type":   datasetType,
+            "fields":         fields,
+            "field_details":  rawFields,
+            "entity_count":   entityCount,
+            "include_links":  includeLinks == 1,
+            "include_images": includeImages == 1,
+            "include_files":  includeFiles == 1,
+        }
+        b, _ := json.MarshalIndent(result, "", "  ")
+        return mcp.NewToolResultText(string(b)), nil
+    },
+)
+
 
 	// ── Tool: query_dataset ───────────────────────────────────────────────────
-	s.AddTool(
-		mcp.NewTool("query_dataset",
-			mcp.WithDescription("Query a dataset with filters, keywords, sorting, and pagination. Supports all formats: json, jsonl, csv, tsv, xml, parquet."),
-			mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to query")),
-			mcp.WithString("version", mcp.Description("Version to query: 'active' (default), 'latest', or 'v1', 'v2' etc")),
-			mcp.WithString("format", mcp.Description("Output format: json (default), jsonl, csv, tsv, xml, parquet")),
-			mcp.WithString("keywords", mcp.Description("Comma-separated keywords to search across all fields including nested")),
-			mcp.WithString("keywords_mode", mcp.Description("'and' requires all keywords match, 'or' (default) requires any")),
-			mcp.WithString("filter", mcp.Description("Exact field match, dot-notation supported: 'reviews.rating:5'")),
-			mcp.WithString("filter_contains", mcp.Description("Partial field match, dot-notation supported: 'reviews.author:john'")),
-			mcp.WithString("keep_field", mcp.Description("Comma-separated fields to keep, dot-notation supported: 'title,reviews.rating'")),
-			mcp.WithString("drop_field", mcp.Description("Comma-separated fields to remove, dot-notation supported: 'reviews.content'")),
-			mcp.WithString("sort", mcp.Description("Sort by top-level field: 'field:asc' or 'field:desc'")),
-			mcp.WithNumber("limit", mcp.Description("Max number of results to return")),
-			mcp.WithNumber("offset", mcp.Description("Number of results to skip")),
-			mcp.WithNumber("sample", mcp.Description("Return N random results")),
-			mcp.WithBoolean("dedup", mcp.Description("Remove duplicate entities")),
-			mcp.WithString("dedup_key", mcp.Description("Comma-separated top-level fields to use for dedup")),
-			mcp.WithBoolean("denull", mcp.Description("Recursively remove null and empty string fields at all depths")),
-			mcp.WithBoolean("flatten", mcp.Description("Flatten nested objects and arrays into top-level fields")),
-			mcp.WithBoolean("include_source", mcp.Description("Include _source field (default true)")),
-			mcp.WithBoolean("count", mcp.Description("Return only the count of matching entities")),
-		),
-		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			userID, ok := ctx.Value(mcpUserIDKey).(string)
-			if !ok || userID == "" {
-				return mcp.NewToolResultError("unauthorized"), nil
-			}
+  s.AddTool(
+    mcp.NewTool("query_dataset",
+        mcp.WithDescription("Query a dataset with filters, keywords, sorting, and pagination. Supports all formats: json, jsonl, csv, tsv, xml, parquet."),
+        mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to query")),
+        mcp.WithString("version", mcp.Description("Version to query: 'active' (default), 'latest', or 'v1', 'v2' etc")),
+        mcp.WithString("format", mcp.Description("Output format: json (default), jsonl, csv, tsv, xml, parquet")),
+        mcp.WithString("keywords", mcp.Description("Comma-separated keywords to search across all fields including nested")),
+        mcp.WithString("keywords_mode", mcp.Description("'and' requires all keywords match, 'or' (default) requires any")),
+        mcp.WithString("filter", mcp.Description("Exact field match, dot-notation supported: 'reviews.rating:5'")),
+        mcp.WithString("filter_contains", mcp.Description("Partial field match, dot-notation supported: 'reviews.author:john'")),
+        mcp.WithString("keep_field", mcp.Description("Comma-separated fields to keep, dot-notation supported: 'title,reviews.rating'")),
+        mcp.WithString("drop_field", mcp.Description("Comma-separated fields to remove, dot-notation supported: 'reviews.content'")),
+        mcp.WithString("sort", mcp.Description("Sort by top-level field: 'field:asc' or 'field:desc'")),
+        mcp.WithNumber("limit", mcp.Description("Max number of results to return")),
+        mcp.WithNumber("offset", mcp.Description("Number of results to skip")),
+        mcp.WithNumber("sample", mcp.Description("Return N random results")),
+        mcp.WithBoolean("dedup", mcp.Description("Remove duplicate entities")),
+        mcp.WithString("dedup_key", mcp.Description("Comma-separated top-level fields to use for dedup")),
+        mcp.WithBoolean("denull", mcp.Description("Recursively remove null and empty string fields at all depths")),
+        mcp.WithBoolean("flatten", mcp.Description("Flatten nested objects and arrays into top-level fields")),
+        mcp.WithBoolean("include_source", mcp.Description("Include _source field (default true)")),
+        mcp.WithBoolean("count", mcp.Description("Return only the count of matching entities")),
+    ),
+    func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+        userID, ok := ctx.Value(mcpUserIDKey).(string)
+        if !ok || userID == "" {
+            return mcp.NewToolResultError("unauthorized"), nil
+        }
 
-			args, ok := req.Params.Arguments.(map[string]interface{})
-			if !ok {
-				return mcp.NewToolResultError("invalid arguments"), nil
-			}
+        args, ok := req.Params.Arguments.(map[string]interface{})
+        if !ok {
+            return mcp.NewToolResultError("invalid arguments"), nil
+        }
 
-			datasetID := int64(args["dataset_id"].(float64))
+        datasetIDFloat, ok := args["dataset_id"].(float64)
+        if !ok {
+            return mcp.NewToolResultError("dataset_id is required and must be a number"), nil
+        }
+        datasetID := int64(datasetIDFloat)
 
-			var ownerID, dataName string
-			err := db.Get().QueryRow(`
-				SELECT user_id, COALESCE(alias, data_name) FROM datasets WHERE dataset_id = ?
-			`, datasetID).Scan(&ownerID, &dataName)
-			if err == sql.ErrNoRows {
-				return mcp.NewToolResultError("dataset not found"), nil
-			}
-			if err != nil {
-				return mcp.NewToolResultError("query failed: " + err.Error()), nil
-			}
-			if ownerID != userID {
-				return mcp.NewToolResultError("access denied"), nil
-			}
+        var ownerID, dataName string
+        err := db.Get().QueryRow(`
+            SELECT user_id, COALESCE(alias, data_name) FROM datasets WHERE dataset_id = ?
+        `, datasetID).Scan(&ownerID, &dataName)
+        if err == sql.ErrNoRows {
+            return mcp.NewToolResultError("dataset not found"), nil
+        }
+        if err != nil {
+            return mcp.NewToolResultError("query failed: " + err.Error()), nil
+        }
+        if ownerID != userID {
+            return mcp.NewToolResultError("access denied"), nil
+        }
 
-			version := "active"
-			if v, ok := args["version"].(string); ok && v != "" {
-				version = v
-			}
+        version := "active"
+        if v, ok := args["version"].(string); ok && v != "" {
+            version = v
+        }
 
-			filePath, versionNumber, err := resolveVersionFile(datasetID, version, false)
-			if err != nil {
-				return mcp.NewToolResultError(err.Error()), nil
-			}
+        filePath, versionNumber, err := resolveVersionFile(datasetID, version, false)
+        if err != nil {
+            return mcp.NewToolResultError(err.Error()), nil
+        }
 
-			entities, err := loadEntitiesFromFile(filePath)
-			if err != nil {
-				return mcp.NewToolResultError("load file: " + err.Error()), nil
-			}
+        entities, err := loadEntitiesFromFile(filePath)
+        if err != nil {
+            return mcp.NewToolResultError("load file: " + err.Error()), nil
+        }
 
-			p := mcpQueryParams{
-				IncludeSource: true,
-				Pretty:        true,
-				Format:        "json",
-			}
+        p := mcpQueryParams{
+            IncludeSource: true,
+            Pretty:        true,
+            Format:        "json",
+        }
 
-			if f, ok := args["format"].(string); ok && f != "" {
-				p.Format = strings.ToLower(f)
-			}
-			if v, ok := args["dedup"].(bool); ok {
-				p.Dedup = v
-			}
-			if v, ok := args["denull"].(bool); ok {
-				p.Denull = v
-			}
-			if v, ok := args["flatten"].(bool); ok {
-				p.FlattenFields = v
-			}
-			if v, ok := args["include_source"].(bool); ok {
-				p.IncludeSource = v
-			}
-			if v, ok := args["count"].(bool); ok {
-				p.CountOnly = v
-			}
-			if v, ok := args["limit"].(float64); ok && v > 0 {
-				p.Limit = int(v)
-			}
-			if v, ok := args["offset"].(float64); ok && v > 0 {
-				p.Offset = int(v)
-			}
-			if v, ok := args["sample"].(float64); ok && v > 0 {
-				p.Sample = int(v)
-			}
-			if v, ok := args["dedup_key"].(string); ok && v != "" {
-				for _, k := range strings.Split(v, ",") {
-					if t := strings.TrimSpace(k); t != "" {
-						p.DedupKeys = append(p.DedupKeys, t)
-					}
-				}
-			}
-			if v, ok := args["keep_field"].(string); ok && v != "" {
-				for _, k := range strings.Split(v, ",") {
-					if t := strings.TrimSpace(k); t != "" {
-						p.KeepFields = append(p.KeepFields, t)
-					}
-				}
-			}
-			if v, ok := args["drop_field"].(string); ok && v != "" {
-				for _, k := range strings.Split(v, ",") {
-					if t := strings.TrimSpace(k); t != "" {
-						p.DropFields = append(p.DropFields, t)
-					}
-				}
-			}
-			if v, ok := args["filter"].(string); ok && v != "" {
-				parts := strings.SplitN(v, ":", 2)
-				if len(parts) == 2 {
-					p.ExactFilters = append(p.ExactFilters, mcpFieldFilter{
-						Field: strings.TrimSpace(parts[0]),
-						Value: strings.ToLower(strings.TrimSpace(parts[1])),
-					})
-				}
-			}
-			if v, ok := args["filter_contains"].(string); ok && v != "" {
-				parts := strings.SplitN(v, ":", 2)
-				if len(parts) == 2 {
-					p.ContainsFilters = append(p.ContainsFilters, mcpFieldFilter{
-						Field: strings.TrimSpace(parts[0]),
-						Value: strings.ToLower(strings.TrimSpace(parts[1])),
-					})
-				}
-			}
-			if v, ok := args["keywords"].(string); ok && v != "" {
-				for _, k := range strings.Split(v, ",") {
-					if t := strings.ToLower(strings.TrimSpace(k)); t != "" {
-						p.Keywords = append(p.Keywords, t)
-					}
-				}
-			}
-			if v, ok := args["keywords_mode"].(string); ok {
-				p.KeywordsAND = strings.ToLower(v) == "and"
-			}
-			if v, ok := args["sort"].(string); ok && v != "" {
-				parts := strings.SplitN(v, ":", 2)
-				p.SortField = strings.TrimSpace(parts[0])
-				p.SortDir = "asc"
-				if len(parts) == 2 && strings.ToLower(parts[1]) == "desc" {
-					p.SortDir = "desc"
-				}
-			}
+        if f, ok := args["format"].(string); ok && f != "" {
+            p.Format = strings.ToLower(f)
+        }
+        if v, ok := args["dedup"].(bool); ok {
+            p.Dedup = v
+        }
+        if v, ok := args["denull"].(bool); ok {
+            p.Denull = v
+        }
+        if v, ok := args["flatten"].(bool); ok {
+            p.FlattenFields = v
+        }
+        if v, ok := args["include_source"].(bool); ok {
+            p.IncludeSource = v
+        }
+        if v, ok := args["count"].(bool); ok {
+            p.CountOnly = v
+        }
+        if v, ok := args["limit"].(float64); ok && v > 0 {
+            p.Limit = int(v)
+        }
+        if v, ok := args["offset"].(float64); ok && v > 0 {
+            p.Offset = int(v)
+        }
+        if v, ok := args["sample"].(float64); ok && v > 0 {
+            p.Sample = int(v)
+        }
+        if v, ok := args["dedup_key"].(string); ok && v != "" {
+            for _, k := range strings.Split(v, ",") {
+                if t := strings.TrimSpace(k); t != "" {
+                    p.DedupKeys = append(p.DedupKeys, t)
+                }
+            }
+        }
+        if v, ok := args["keep_field"].(string); ok && v != "" {
+            for _, k := range strings.Split(v, ",") {
+                if t := strings.TrimSpace(k); t != "" {
+                    p.KeepFields = append(p.KeepFields, t)
+                }
+            }
+        }
+        if v, ok := args["drop_field"].(string); ok && v != "" {
+            for _, k := range strings.Split(v, ",") {
+                if t := strings.TrimSpace(k); t != "" {
+                    p.DropFields = append(p.DropFields, t)
+                }
+            }
+        }
+        if v, ok := args["filter"].(string); ok && v != "" {
+            parts := strings.SplitN(v, ":", 2)
+            if len(parts) == 2 {
+                p.ExactFilters = append(p.ExactFilters, mcpFieldFilter{
+                    Field: strings.TrimSpace(parts[0]),
+                    Value: strings.ToLower(strings.TrimSpace(parts[1])),
+                })
+            }
+        }
+        if v, ok := args["filter_contains"].(string); ok && v != "" {
+            parts := strings.SplitN(v, ":", 2)
+            if len(parts) == 2 {
+                p.ContainsFilters = append(p.ContainsFilters, mcpFieldFilter{
+                    Field: strings.TrimSpace(parts[0]),
+                    Value: strings.ToLower(strings.TrimSpace(parts[1])),
+                })
+            }
+        }
+        if v, ok := args["keywords"].(string); ok && v != "" {
+            for _, k := range strings.Split(v, ",") {
+                if t := strings.ToLower(strings.TrimSpace(k)); t != "" {
+                    p.Keywords = append(p.Keywords, t)
+                }
+            }
+        }
+        if v, ok := args["keywords_mode"].(string); ok {
+            p.KeywordsAND = strings.ToLower(v) == "and"
+        }
+        if v, ok := args["sort"].(string); ok && v != "" {
+            parts := strings.SplitN(v, ":", 2)
+            p.SortField = strings.TrimSpace(parts[0])
+            p.SortDir = "asc"
+            if len(parts) == 2 && strings.ToLower(parts[1]) == "desc" {
+                p.SortDir = "desc"
+            }
+        }
 
-			if p.FlattenFields || p.Format == "csv" || p.Format == "tsv" || p.Format == "parquet" {
-				for i, e := range entities {
-					entities[i] = apiFlattenFull(e, "")
-				}
-			}
+        if p.FlattenFields || p.Format == "csv" || p.Format == "tsv" || p.Format == "parquet" {
+            for i, e := range entities {
+                entities[i] = apiFlattenFull(e, "")
+            }
+        }
 
-			entities = runQueryPipeline(entities, p)
+        entities = runQueryPipeline(entities, p)
 
-			if p.CountOnly {
-				b, _ := json.MarshalIndent(map[string]interface{}{
-					"count":      len(entities),
-					"dataset_id": datasetID,
-					"version":    versionNumber,
-				}, "", "  ")
-				return mcp.NewToolResultText(string(b)), nil
-			}
+        if p.CountOnly {
+            b, _ := json.MarshalIndent(map[string]interface{}{
+                "count":      len(entities),
+                "dataset_id": datasetID,
+                "version":    versionNumber,
+            }, "", "  ")
+            return mcp.NewToolResultText(string(b)), nil
+        }
 
-			out, err := formatEntities(entities, p.Format, dataName, p.FlattenFields)
-			if err != nil {
-				return mcp.NewToolResultError("format error: " + err.Error()), nil
-			}
+        out, err := formatEntities(entities, p.Format, dataName, p.FlattenFields)
+        if err != nil {
+            return mcp.NewToolResultError("format error: " + err.Error()), nil
+        }
 
-			go incrementAPIHit(datasetID)
+        go incrementAPIHit(datasetID)
 
-			return mcp.NewToolResultText(out), nil
-		},
-	)
+        return mcp.NewToolResultText(out), nil
+    },
+)
 
-	// ── Tool: pull_for_edit ───────────────────────────────────────────────────
-	s.AddTool(
-		mcp.NewTool("pull_for_edit",
-			mcp.WithDescription("Pull the full unfiltered entity list from a dataset version for AI processing. Can pull original or alt version. Use push_alt_version to save processed results back."),
-			mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to pull from")),
-			mcp.WithString("version", mcp.Description("Version to pull: 'active' (default), 'latest', or 'v1', 'v2' etc")),
-			mcp.WithBoolean("use_alt", mcp.Description("Set true to pull the alt version instead of the original")),
-		),
-		func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			userID, ok := ctx.Value(mcpUserIDKey).(string)
-			if !ok || userID == "" {
-				return mcp.NewToolResultError("unauthorized"), nil
-			}
+// ── Tool: pull_for_edit ───────────────────────────────────────────────────
+  s.AddTool(
+    mcp.NewTool("pull_for_edit",
+        mcp.WithDescription("Pull the full unfiltered entity list from a dataset version for AI processing. Can pull original or alt version. Use push_alt_version to save processed results back."),
+        mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to pull from")),
+        mcp.WithString("version", mcp.Description("Version to pull: 'active' (default), 'latest', or 'v1', 'v2' etc")),
+        mcp.WithBoolean("use_alt", mcp.Description("Set true to pull the alt version instead of the original")),
+    ),
+    func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+        userID, ok := ctx.Value(mcpUserIDKey).(string)
+        if !ok || userID == "" {
+            return mcp.NewToolResultError("unauthorized"), nil
+        }
 
-			args, ok := req.Params.Arguments.(map[string]interface{})
-			if !ok {
-				return mcp.NewToolResultError("invalid arguments"), nil
-			}
+        args, ok := req.Params.Arguments.(map[string]interface{})
+        if !ok {
+            return mcp.NewToolResultError("invalid arguments"), nil
+        }
 
-			datasetID := int64(args["dataset_id"].(float64))
+        datasetIDFloat, ok := args["dataset_id"].(float64)
+        if !ok {
+            return mcp.NewToolResultError("dataset_id is required and must be a number"), nil
+        }
+        datasetID := int64(datasetIDFloat)
 
-			var ownerID string
-			err := db.Get().QueryRow(`
-				SELECT user_id FROM datasets WHERE dataset_id = ?
-			`, datasetID).Scan(&ownerID)
-			if err == sql.ErrNoRows {
-				return mcp.NewToolResultError("dataset not found"), nil
-			}
-			if err != nil {
-				return mcp.NewToolResultError("query failed: " + err.Error()), nil
-			}
-			if ownerID != userID {
-				return mcp.NewToolResultError("access denied"), nil
-			}
+        var ownerID string
+        err := db.Get().QueryRow(`
+            SELECT user_id FROM datasets WHERE dataset_id = ?
+        `, datasetID).Scan(&ownerID)
+        if err == sql.ErrNoRows {
+            return mcp.NewToolResultError("dataset not found"), nil
+        }
+        if err != nil {
+            return mcp.NewToolResultError("query failed: " + err.Error()), nil
+        }
+        if ownerID != userID {
+            return mcp.NewToolResultError("access denied"), nil
+        }
 
-			version := "active"
-			if v, ok := args["version"].(string); ok && v != "" {
-				version = v
-			}
-			useAlt := false
-			if v, ok := args["use_alt"].(bool); ok {
-				useAlt = v
-			}
+        version := "active"
+        if v, ok := args["version"].(string); ok && v != "" {
+            version = v
+        }
+        useAlt := false
+        if v, ok := args["use_alt"].(bool); ok {
+            useAlt = v
+        }
 
-			filePath, versionNumber, err := resolveVersionFile(datasetID, version, useAlt)
-			if err != nil {
-				return mcp.NewToolResultError(err.Error()), nil
-			}
+        filePath, versionNumber, err := resolveVersionFile(datasetID, version, useAlt)
+        if err != nil {
+            return mcp.NewToolResultError(err.Error()), nil
+        }
 
-			entities, err := loadEntitiesFromFile(filePath)
-			if err != nil {
-				return mcp.NewToolResultError("load file: " + err.Error()), nil
-			}
+        entities, err := loadEntitiesFromFile(filePath)
+        if err != nil {
+            return mcp.NewToolResultError("load file: " + err.Error()), nil
+        }
 
-			result := map[string]interface{}{
-				"dataset_id":   datasetID,
-				"version":      versionNumber,
-				"is_alt":       useAlt,
-				"entity_count": len(entities),
-				"entities":     entities,
-			}
-			b, _ := json.MarshalIndent(result, "", "  ")
-			return mcp.NewToolResultText(string(b)), nil
-		},
-	)
+        result := map[string]interface{}{
+            "dataset_id":   datasetID,
+            "version":      versionNumber,
+            "is_alt":       useAlt,
+            "entity_count": len(entities),
+            "entities":     entities,
+        }
+        b, _ := json.MarshalIndent(result, "", "  ")
+        return mcp.NewToolResultText(string(b)), nil
+    },
+)
 
-	// ── Tool: push_alt_version ────────────────────────────────────────────────
-	s.AddTool(
+// ── Tool: push_alt_version ────────────────────────────────────────────────
+  s.AddTool(
     mcp.NewTool("push_alt_version",
         mcp.WithDescription("Push AI-processed entities back as the alt version of a dataset. Always writes to alt, never overwrites the original. Use pull_for_edit first to get entities."),
         mcp.WithNumber("dataset_id", mcp.Required(), mcp.Description("The dataset ID to push to")),
@@ -1076,8 +1098,18 @@ func setupMCPServer() *server.MCPServer {
             return mcp.NewToolResultError("invalid arguments"), nil
         }
 
-        datasetID := int64(args["dataset_id"].(float64))
-        versionNumber := int(args["version"].(float64))
+        datasetIDFloat, ok := args["dataset_id"].(float64)
+        if !ok {
+            return mcp.NewToolResultError("dataset_id is required and must be a number"), nil
+        }
+        datasetID := int64(datasetIDFloat)
+
+        versionFloat, ok := args["version"].(float64)
+        if !ok {
+            return mcp.NewToolResultError("version is required and must be a number"), nil
+        }
+        versionNumber := int(versionFloat)
+
         entitiesJSON, ok := args["entities"].(string)
         if !ok || strings.TrimSpace(entitiesJSON) == "" {
             return mcp.NewToolResultError("entities is required"), nil
@@ -1101,7 +1133,6 @@ func setupMCPServer() *server.MCPServer {
             return mcp.NewToolResultError("dataset is frozen — unfreeze it before pushing an alt version"), nil
         }
 
-        // ── Processing check ──────────────────────────────────────────────────
         var processingCount int
         err = db.Get().QueryRow(`
             SELECT COUNT(*) FROM queue q
