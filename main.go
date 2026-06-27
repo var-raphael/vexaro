@@ -143,18 +143,34 @@ func keepAliveHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dummy int
-	if err := db.Get().QueryRow(`SELECT 1`).Scan(&dummy); err != nil {
+	var totalDatasets, totalVersions int
+	var newestCreatedAt sql.NullTime
+
+	err := db.Get().QueryRow(`
+		SELECT
+			COUNT(DISTINCT d.dataset_id),
+			COUNT(dv.dataset_id),
+			MAX(dv.created_at)
+		FROM datasets d
+		LEFT JOIN dataset_versions dv ON dv.dataset_id = d.dataset_id
+	`).Scan(&totalDatasets, &totalVersions, &newestCreatedAt)
+	if err != nil {
 		log.Printf("[keepalive] db check failed: %v", err)
 		http.Error(w, "db unreachable", http.StatusServiceUnavailable)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"ok":   true,
-		"pong": time.Now().UTC(),
-	})
+	resp := map[string]interface{}{
+		"ok":             true,
+		"pong":           time.Now().UTC(),
+		"total_datasets": totalDatasets,
+		"total_versions": totalVersions,
+	}
+	if newestCreatedAt.Valid {
+		resp["newest_version_at"] = newestCreatedAt.Time
+	}
+	json.NewEncoder(w).Encode(resp)
 }
 
 func generateKey() string {
