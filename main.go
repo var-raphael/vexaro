@@ -511,7 +511,6 @@ func cloneDatasetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── Plan check ────────────────────────────────────────────────────────────
 	plan := GetUserPlan(userID)
 	if CountUserDatasets(userID) >= plan.Datasets {
 		w.Header().Set("Content-Type", "application/json")
@@ -613,13 +612,10 @@ func cloneDatasetHandler(w http.ResponseWriter, r *http.Request) {
 
 	var schemaFields string
 	var schemaSource string
-	var includeFiles, includeImages int
 	err = db.Get().QueryRow(`
-		SELECT fields, COALESCE(source, 'web'), include_files, include_images
+		SELECT fields, COALESCE(source, 'web')
 		FROM dataset_schema WHERE dataset_id = ?
-	`, req.SourceDatasetID).Scan(
-		&schemaFields, &schemaSource, &includeFiles, &includeImages,
-	)
+	`, req.SourceDatasetID).Scan(&schemaFields, &schemaSource)
 	if err != nil {
 		http.Error(w, "query source schema: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -821,9 +817,9 @@ func cloneDatasetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = tx.Exec(`
-		INSERT INTO dataset_schema (dataset_id, fields, source, include_files, include_images)
-		VALUES (?, ?, ?, ?, ?)
-	`, newDatasetID, schemaFields, schemaSource, includeFiles, includeImages)
+		INSERT INTO dataset_schema (dataset_id, fields, source)
+		VALUES (?, ?, ?)
+	`, newDatasetID, schemaFields, schemaSource)
 	if err != nil {
 		rollbackCopied()
 		http.Error(w, "insert schema: "+err.Error(), http.StatusInternalServerError)
