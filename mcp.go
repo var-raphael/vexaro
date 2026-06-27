@@ -1212,11 +1212,11 @@ func mcpSSEHandler(mcpServer *server.MCPServer) http.HandlerFunc {
 		log.Printf("[mcp/sse] user_id=%s connected", userID)
 
 		sseServer := server.NewSSEServer(mcpServer,
-			server.WithBaseURL("http://localhost:8080"),
-			server.WithDynamicBasePath(func(r *http.Request, sessionID string) string {
-				return fmt.Sprintf("/mcp/%s", token)
-			}),
-		)
+    server.WithBaseURL("https://quorel.onrender.com"),
+    server.WithDynamicBasePath(func(r *http.Request, sessionID string) string {
+        return fmt.Sprintf("/mcp/%s", token)
+    }),
+)
 
 		sseServer.SSEHandler().ServeHTTP(w, r)
 	}
@@ -1226,7 +1226,7 @@ func mcpSSEHandler(mcpServer *server.MCPServer) http.HandlerFunc {
 
 func registerMCPRoutes(mcpServer *server.MCPServer) {
 	sseServer := server.NewSSEServer(mcpServer,
-		server.WithBaseURL("http://localhost:8080"),
+		server.WithBaseURL("https://quorel.onrender.com"),
 		server.WithDynamicBasePath(func(r *http.Request, sessionID string) string {
 			token := strings.TrimPrefix(r.URL.Path, "/mcp/")
 			token = strings.Split(token, "/")[0]
