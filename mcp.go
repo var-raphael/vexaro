@@ -652,7 +652,7 @@ func resolveVersionFile(datasetID int64, version string, useAlt bool) (string, i
 
 func setupMCPServer() *server.MCPServer {
 	s := server.NewMCPServer(
-		"Quoral",
+		"Quorel",
 		"1.0.0",
 		server.WithToolCapabilities(true),
 	)
