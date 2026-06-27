@@ -1256,25 +1256,32 @@ func registerMCPRoutes(mcpServer *server.MCPServer) {
 	http.HandleFunc("/mcp/token/revoke", corsMiddleware(authMiddleware(mcpTokenRevokeHandler)))
 	http.HandleFunc("/mcp/token/view", corsMiddleware(authMiddleware(mcpTokenViewHandler)))
 	http.HandleFunc("/mcp/", func(w http.ResponseWriter, r *http.Request) {
-		parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/mcp/"), "/")
-		if len(parts) == 0 {
-			http.Error(w, "invalid path", http.StatusBadRequest)
-			return
-		}
-		token := parts[0]
-		userID, err := validateMCPToken(token)
-		if err != nil {
-			http.Error(w, "unauthorized: "+err.Error(), http.StatusUnauthorized)
-			return
-		}
-		ctx := context.WithValue(r.Context(), mcpUserIDKey, userID)
-		r = r.WithContext(ctx)
-		log.Printf("[mcp/sse] user_id=%s connected", userID)
+    parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/mcp/"), "/")
+    if len(parts) == 0 {
+        http.Error(w, "invalid path", http.StatusBadRequest)
+        return
+    }
+    token := parts[0]
+    userID, err := validateMCPToken(token)
+    if err != nil {
+        http.Error(w, "unauthorized: "+err.Error(), http.StatusUnauthorized)
+        return
+    }
+    ctx := context.WithValue(r.Context(), mcpUserIDKey, userID)
+    r = r.WithContext(ctx)
 
-		if len(parts) > 1 && parts[1] == "message" {
-			sseServer.MessageHandler().ServeHTTP(w, r)
-		} else {
-			sseServer.SSEHandler().ServeHTTP(w, r)
-		}
-	})
+    isMessage := len(parts) > 1 && parts[1] == "message"
+    connStart := time.Now()
+    log.Printf("[mcp/sse] user_id=%s connected (message=%v)", userID, isMessage)
+    defer func() {
+        log.Printf("[mcp/sse] user_id=%s disconnected (message=%v) after %v",
+            userID, isMessage, time.Since(connStart))
+    }()
+
+    if isMessage {
+        sseServer.MessageHandler().ServeHTTP(w, r)
+    } else {
+        sseServer.SSEHandler().ServeHTTP(w, r)
+    }
+})
 }
