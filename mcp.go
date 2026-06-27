@@ -181,14 +181,18 @@ func mcpTokenViewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resp := map[string]interface{}{
+		"has_token":  true,
+		"token":      token,
+		"is_active":  isActive == 1,
+		"created_at": createdAt,
+	}
+	if lastUsedAt.Valid {
+		resp["last_used_at"] = lastUsedAt.Time
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"has_token":    true,
-		"token":        token,
-		"is_active":    isActive == 1,
-		"last_used_at": lastUsedAt.Time,
-		"created_at":   createdAt,
-	})
+	json.NewEncoder(w).Encode(resp)
 }
 
 // ---------------------------------------------------------------- query pipeline --
